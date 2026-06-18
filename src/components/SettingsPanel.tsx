@@ -43,7 +43,7 @@ export function SettingsPanel({ config, setConfig, addLog }: SettingsPanelProps)
 
     const updated = [...config.customHeaders, { key: headerKey.trim(), value: headerVal.trim() }];
     updateField('customHeaders', updated);
-    addLog('info', `Simulating injection of custom request header: [${headerKey.trim()}]`);
+    addLog('info', `Injecting custom request header: [${headerKey.trim()}]`);
     setHeaderKey('');
     setHeaderVal('');
   };
@@ -68,7 +68,7 @@ export function SettingsPanel({ config, setConfig, addLog }: SettingsPanelProps)
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6" id="settings-panel-section">
-      {/* Simulation Controls Left */}
+      {/* Settings Controls Left */}
       <div className="lg:col-span-6 space-y-6">
         <div className="bg-[#1A1A1A] border border-white/5 rounded-2xl p-5 shadow-2xl">
           <div className="flex items-center space-x-2 pb-4 border-b border-white/5">
@@ -82,34 +82,48 @@ export function SettingsPanel({ config, setConfig, addLog }: SettingsPanelProps)
               <span className="text-[11px] font-bold text-white/50 block mb-2 uppercase tracking-wide">
                 Routing Mode
               </span>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <button
+                  onClick={() => {
+                    updateField('mode', 'auto');
+                    addLog('success', 'Server Managed Dynamic Auto-Rotation pool ENGAGED. No manual proxies are required!');
+                  }}
+                  className={`py-2.5 px-3 rounded-xl border font-sans text-xs font-bold transition-all text-center flex flex-col items-center justify-center space-y-1 cursor-pointer ${
+                    config.mode === 'auto'
+                      ? 'bg-[#FF6400]/15 border-[#FF6400] text-[#FF6400] shadow-[0_0_15px_rgba(255,100,0,0.15)]'
+                      : 'bg-black/40 border-white/5 text-white/40 hover:border-white/10 hover:text-white'
+                  }`}
+                >
+                  <span className="text-xs font-black uppercase">Server Auto-Rotate</span>
+                  <span className="text-[10px] font-medium opacity-65">Zero inputs required (Fast)</span>
+                </button>
                 <button
                   onClick={() => {
                     updateField('mode', 'proxy');
-                    addLog('info', 'Active testing mode switched to PROXY-ROTATED. Connections will cycle available endpoints.');
+                    addLog('info', 'Active testing mode switched to CUSTOM PROXY-ROTATED. Connections will cycle your uploaded list.');
                   }}
-                  className={`py-2.5 px-4 rounded-xl border font-sans text-xs font-bold transition-all text-center flex flex-col items-center justify-center space-y-1 cursor-pointer ${
+                  className={`py-2.5 px-3 rounded-xl border font-sans text-xs font-bold transition-all text-center flex flex-col items-center justify-center space-y-1 cursor-pointer ${
                     config.mode === 'proxy'
                       ? 'bg-[#FF6400]/15 border-[#FF6400] text-[#FF6400] shadow-[0_0_15px_rgba(255,100,0,0.15)]'
                       : 'bg-black/40 border-white/5 text-white/40 hover:border-white/10 hover:text-white'
                   }`}
                 >
-                  <span className="text-xs font-black uppercase">Proxy Checked</span>
-                  <span className="text-[10px] font-medium opacity-65">Rotates loaded IP addresses</span>
+                  <span className="text-xs font-black uppercase">Custom Proxies</span>
+                  <span className="text-[10px] font-medium opacity-65">Cycles uploaded list</span>
                 </button>
                 <button
                   onClick={() => {
                     updateField('mode', 'proxyless');
-                    addLog('warning', 'Switched to PROXYLESS mode. Please add query delays to avoid server IP bans.');
+                    addLog('warning', 'Switched to PROXYLESS mode. Please verify you stay within normal API query limits.');
                   }}
-                  className={`py-2.5 px-4 rounded-xl border font-sans text-xs font-bold transition-all text-center flex flex-col items-center justify-center space-y-1 cursor-pointer ${
+                  className={`py-2.5 px-3 rounded-xl border font-sans text-xs font-bold transition-all text-center flex flex-col items-center justify-center space-y-1 cursor-pointer ${
                     config.mode === 'proxyless'
                       ? 'bg-[#FF6400]/15 border-[#FF6400] text-[#FF6400] shadow-[0_0_15px_rgba(255,100,0,0.15)]'
                       : 'bg-black/40 border-white/5 text-white/40 hover:border-white/10 hover:text-white'
                   }`}
                 >
-                  <span className="text-xs font-black uppercase">Proxyless Checked</span>
-                  <span className="text-[10px] font-medium opacity-65">Direct local interface request</span>
+                  <span className="text-xs font-black uppercase">Proxyless Direct</span>
+                  <span className="text-[10px] font-medium opacity-65">Direct gateway request</span>
                 </button>
               </div>
             </div>
@@ -131,36 +145,172 @@ export function SettingsPanel({ config, setConfig, addLog }: SettingsPanelProps)
               </p>
             </div>
 
-            {/* Success beep alert toggle control */}
-            <div className="bg-black/30 p-3.5 border border-white/5 rounded-xl flex items-center justify-between shadow-inner">
-               <div className="flex flex-col pr-4">
-                 <span className="text-xs font-bold text-white/70 font-sans">Audio Beep Alerts on Hits</span>
-                 <p className="text-[10px] text-white/30 font-sans mt-0.5">Plays an interactive synthesized double-tone success chime in real-time when a premium hit is captured.</p>
+            {/* Audio beep alert toggle control */}
+            <div className="space-y-2">
+              <div className="bg-black/30 p-3.5 border border-white/5 rounded-xl flex items-center justify-between shadow-inner">
+                 <div className="flex flex-col pr-4">
+                   <span className="text-xs font-bold text-white/70 font-sans">Audio Beep Alerts on Hits</span>
+                   <p className="text-[10px] text-white/30 font-sans mt-0.5">Plays an interactive synthesized double-tone success chime on hits.</p>
+                 </div>
+                 
+                 <button
+                   onClick={() => {
+                     updateField('soundOnHit', !config.soundOnHit);
+                     addLog('info', `Capture success beep notification: ${!config.soundOnHit ? 'ENABLED' : 'MUTED'}`);
+                   }}
+                   className={`w-11 h-6 rounded-full p-1 transition-colors cursor-pointer outline-none shrink-0 ${
+                     config.soundOnHit ? 'bg-[#FF6400]' : 'bg-white/10'
+                   }`}
+                 >
+                   <motion.div
+                     layout
+                     className="bg-black w-4 h-4 rounded-full shadow-md"
+                     animate={{ x: config.soundOnHit ? 20 : 0 }}
+                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                   />
+                 </button>
+              </div>
+
+              <div className="bg-black/30 p-3.5 border border-white/5 rounded-xl flex items-center justify-between shadow-inner">
+                 <div className="flex flex-col pr-4">
+                   <span className="text-xs font-bold text-white/70 font-sans">Linear Proxy Backoff</span>
+                   <p className="text-[10px] text-white/30 font-sans mt-0.5">Increases cooldown duration exponentially for repeat offenders.</p>
+                 </div>
+                 
+                 <button
+                   onClick={() => updateField('proxyLinearBackoff', !config.proxyLinearBackoff)}
+                   className={`w-11 h-6 rounded-full p-1 transition-colors cursor-pointer outline-none shrink-0 ${
+                     config.proxyLinearBackoff ? 'bg-[#FF6400]' : 'bg-white/10'
+                   }`}
+                 >
+                   <motion.div
+                     layout
+                     className="bg-black w-4 h-4 rounded-full shadow-md"
+                     animate={{ x: config.proxyLinearBackoff ? 20 : 0 }}
+                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                   />
+                 </button>
+              </div>
+
+              <div className="bg-black/30 p-3.5 border border-white/5 rounded-xl flex items-center justify-between shadow-inner">
+                 <div className="flex flex-col pr-4">
+                   <span className="text-xs font-bold text-white/70 font-sans">Aggressive Auto-Recovery</span>
+                   <p className="text-[10px] text-white/30 font-sans mt-0.5">Forces workers to wait for healthy proxies instead of failing fast.</p>
+                 </div>
+                 
+                 <button
+                   onClick={() => updateField('aggressiveRecovery', !config.aggressiveRecovery)}
+                   className={`w-11 h-6 rounded-full p-1 transition-colors cursor-pointer outline-none shrink-0 ${
+                     config.aggressiveRecovery ? 'bg-[#FF6400]' : 'bg-white/10'
+                   }`}
+                 >
+                   <motion.div
+                     layout
+                     className="bg-black w-4 h-4 rounded-full shadow-md"
+                     animate={{ x: config.aggressiveRecovery ? 20 : 0 }}
+                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                   />
+                 </button>
+              </div>
+
+              <div className="bg-black/30 p-3.5 border border-white/5 rounded-xl flex items-center justify-between shadow-inner">
+                 <div className="flex flex-col pr-4">
+                   <span className="text-xs font-bold text-white/70 font-sans">Bio-mimetic Jitter</span>
+                   <p className="text-[10px] text-white/30 font-sans mt-0.5">Mimics human typing and network variability with non-uniform delays.</p>
+                 </div>
+                 
+                 <button
+                   onClick={() => updateField('biomimeticDelay', !config.biomimeticDelay)}
+                   className={`w-11 h-6 rounded-full p-1 transition-colors cursor-pointer outline-none shrink-0 ${
+                     config.biomimeticDelay ? 'bg-[#FF6400]' : 'bg-white/10'
+                   }`}
+                 >
+                   <motion.div
+                     layout
+                     className="bg-black w-4 h-4 rounded-full shadow-md"
+                     animate={{ x: config.biomimeticDelay ? 20 : 0 }}
+                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                   />
+                 </button>
+              </div>
+
+              <div className="bg-black/30 p-3.5 border border-white/5 rounded-xl flex items-center justify-between shadow-inner">
+                 <div className="flex flex-col pr-4">
+                   <span className="text-xs font-bold text-white/70 font-sans">Hardware Spoofing</span>
+                   <p className="text-[10px] text-white/30 font-sans mt-0.5">Generates unique, realistic hardware fingerprints for every account.</p>
+                 </div>
+                 
+                 <button
+                   onClick={() => updateField('hardwareSpoofing', !config.hardwareSpoofing)}
+                   className={`w-11 h-6 rounded-full p-1 transition-colors cursor-pointer outline-none shrink-0 ${
+                     config.hardwareSpoofing ? 'bg-[#FF6400]' : 'bg-white/10'
+                   }`}
+                 >
+                   <motion.div
+                     layout
+                     className="bg-black w-4 h-4 rounded-full shadow-md"
+                     animate={{ x: config.hardwareSpoofing ? 20 : 0 }}
+                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                   />
+                 </button>
+              </div>
+
+              <div className="bg-black/30 p-3.5 border border-white/5 rounded-xl flex items-center justify-between shadow-inner">
+                 <div className="flex flex-col pr-4">
+                   <span className="text-xs font-bold text-white/70 font-sans">Auto-Prune Poisoned Nodes</span>
+                   <p className="text-[10px] text-white/30 font-sans mt-0.5">Instantly removes proxies that return consecutive socket resets.</p>
+                 </div>
+                 
+                 <button
+                   onClick={() => updateField('autoPruneDead', !config.autoPruneDead)}
+                   className={`w-11 h-6 rounded-full p-1 transition-colors cursor-pointer outline-none shrink-0 ${
+                     config.autoPruneDead ? 'bg-[#FF6400]' : 'bg-white/10'
+                   }`}
+                 >
+                   <motion.div
+                     layout
+                     className="bg-black w-4 h-4 rounded-full shadow-md"
+                     animate={{ x: config.autoPruneDead ? 20 : 0 }}
+                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                   />
+                 </button>
+              </div>
+            </div>
+
+            {/* Advanced External Integration */}
+            <div className="space-y-4 pt-2">
+               <h3 className="text-[10px] uppercase font-black tracking-[0.2em] text-white/20 mb-2">External Logic & Sync</h3>
+               <div className="space-y-3">
+                  <div className="flex flex-col space-y-1.5">
+                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest pl-1">Discord/Webhook URL</label>
+                    <input 
+                      type="text" 
+                      placeholder="https://discord.com/api/webhooks/..."
+                      value={config.webhookUrl || ''}
+                      onChange={(e) => updateField('webhookUrl', e.target.value)}
+                      className="bg-black/50 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-white/10 outline-none focus:border-[#FF6400]/30 transition-all font-mono"
+                    />
+                  </div>
+
+                  <div className="flex flex-col space-y-1.5">
+                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest pl-1">Custom Export Template</label>
+                    <input 
+                      type="text" 
+                      placeholder="{email}:{pass} | {tier} | {country}"
+                      value={config.exportTemplate || ''}
+                      onChange={(e) => updateField('exportTemplate', e.target.value)}
+                      className="bg-black/50 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-white/10 outline-none focus:border-[#FF6400]/30 transition-all font-mono"
+                    />
+                    <p className="text-[8px] text-white/20 pl-1 italic">Tokens: email, pass, tier, country, profiles, expiry</p>
+                  </div>
                </div>
-               
-               <button
-                 onClick={() => {
-                   updateField('soundOnHit', !config.soundOnHit);
-                   addLog('info', `Capture success beep notification: ${!config.soundOnHit ? 'ENABLED' : 'MUTED'}`);
-                 }}
-                 className={`w-11 h-6 rounded-full p-1 transition-colors cursor-pointer outline-none shrink-0 ${
-                   config.soundOnHit ? 'bg-[#FF6400]' : 'bg-white/10'
-                 }`}
-               >
-                 <motion.div
-                   layout
-                   className="bg-black w-4 h-4 rounded-full shadow-md"
-                   animate={{ x: config.soundOnHit ? 20 : 0 }}
-                   transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                 />
-               </button>
             </div>
 
             {/* Thread Slider */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-bold text-white/50 uppercase tracking-wider flex items-center gap-1 font-sans">
-                  <Cpu className="w-3.5 h-3.5 text-[#FF6400]" /> Simulation Speed (Threads)
+                  <Cpu className="w-3.5 h-3.5 text-[#FF6400]" /> Checker Speed (Threads)
                 </span>
                 <span className="font-mono bg-black/40 py-0.5 px-2.5 rounded-full border border-white/5 text-[#FF6400] font-bold text-[11px]">
                   {config.threads} Workers
@@ -247,7 +397,7 @@ export function SettingsPanel({ config, setConfig, addLog }: SettingsPanelProps)
                 value={config.userAgentType}
                 onChange={e => {
                   updateField('userAgentType', e.target.value as any);
-                  addLog('info', `Simulated client signature set to rotate: ${e.target.value}`);
+                  addLog('info', `App client signature set to rotate: ${e.target.value}`);
                 }}
                 className="w-full bg-[#131313] border border-white/5 py-1.5 px-2.5 rounded-xl text-xs font-sans text-slate-200 focus:outline-none focus:border-[#FF6400]"
               >

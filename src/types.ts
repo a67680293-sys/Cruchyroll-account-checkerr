@@ -17,6 +17,13 @@ export interface ComboItem {
   checkedAt?: string;
   errorMessage?: string;
   checkedByProxy?: string;
+  retriesLeft?: number;
+  capture?: {
+    accessToken?: string;
+    externalId?: string;
+    accountId?: string;
+    profileName?: string;
+  };
 }
 
 export interface ProxyItem {
@@ -29,10 +36,20 @@ export interface ProxyItem {
   status: ProxyStatus;
   ping?: number; // ms
   errorMessage?: string;
+  blacklistedUntil?: number;
+  blacklistReason?: string;
+  banCount?: number;
+  successCount?: number;
+  failCount?: number;
+  quality?: number; // 0-100 score
+  avgLatency?: number; // rolling average
+  lastUsed?: number;
+  provider?: string; 
+  consecutiveFailures?: number;
 }
 
 export interface CheckerConfig {
-  mode: 'proxy' | 'proxyless';
+  mode: 'proxy' | 'proxyless' | 'auto';
   threads: number;
   delay: number; // in Milliseconds
   timeout: number; // in Milliseconds
@@ -40,6 +57,13 @@ export interface CheckerConfig {
   userAgentType: 'Mobile Android' | 'Mobile iOS' | 'Web Chrome' | 'Web Firefox' | 'Random';
   customHeaders: Array<{ key: string; value: string }>;
   soundOnHit?: boolean;
+  aggressiveRecovery?: boolean;
+  proxyLinearBackoff?: boolean;
+  biomimeticDelay?: boolean;
+  hardwareSpoofing?: boolean;
+  exportTemplate?: string;
+  webhookUrl?: string;
+  autoPruneDead?: boolean;
 }
 
 export interface CheckerStats {

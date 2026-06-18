@@ -16,25 +16,26 @@ import {
   SlidersHorizontal,
   ChevronDown
 } from 'lucide-react';
-import { ComboItem, SubscriptionTier } from '../types';
+import { ComboItem, SubscriptionTier, CheckerConfig } from '../types';
 
 interface ResultsExportProps {
   combos: ComboItem[];
   setCombos: React.Dispatch<React.SetStateAction<ComboItem[]>>;
   addLog: (type: 'info' | 'success' | 'warning' | 'error' | 'debug', msg: string) => void;
+  config: CheckerConfig;
 }
 
 type ModeTab = 'hits' | 'free' | '2fa' | 'invalid' | 'errors' | 'all';
-type ExportSyntax = 'basic' | 'captured_full' | 'captured_simple';
+type ExportSyntax = 'basic' | 'captured_full' | 'captured_simple' | 'python_format' | 'custom_template';
 
-export function ResultsExport({ combos, setCombos, addLog }: ResultsExportProps) {
+export function ResultsExport({ combos, setCombos, addLog, config }: ResultsExportProps) {
   const [activeTab, setActiveTab] = useState<ModeTab>('hits');
   const [searchQuery, setSearchQuery] = useState('');
   const [tierFilter, setTierFilter] = useState<SubscriptionTier | 'ALL'>('ALL');
   const [countryFilter, setCountryFilter] = useState<string | 'ALL'>('ALL');
   
   // Exporter Syntax State
-  const [exportSyntax, setExportSyntax] = useState<ExportSyntax>('captured_full');
+  const [exportSyntax, setExportSyntax] = useState<ExportSyntax>('python_format');
 
   // Clear checked results
   const clearChecked = () => {
@@ -77,6 +78,24 @@ export function ResultsExport({ combos, setCombos, addLog }: ResultsExportProps)
         return `${acc.email}:${acc.pass}`;
       } else if (exportSyntax === 'captured_simple') {
         return `${acc.email}:${acc.pass} | Tier: ${acc.tier} | Exp: ${acc.expiry}`;
+      } else if (exportSyntax === 'python_format') {
+        // Output perfectly matches the python script output logic
+        const pName = acc.capture?.profileName || 'unknown';
+        const atok = acc.capture?.accessToken || 'unknown';
+        const aid = acc.capture?.accountId || 'unknown';
+        const eid = acc.capture?.externalId || 'unknown';
+        return `${pName}:${acc.email}:${acc.pass}:${atok}:${aid}:${acc.tier}:${acc.profiles}:${eid}:${acc.country}`;
+      } else if (exportSyntax === 'custom_template') {
+        const template = config.exportTemplate || '{email}:{pass} | {tier}';
+        return template
+          .replace(/{email}/g, acc.email)
+          .replace(/{pass}/g, acc.pass)
+          .replace(/{tier}/g, acc.tier)
+          .replace(/{country}/g, acc.country)
+          .replace(/{expiry}/g, acc.expiry)
+          .replace(/{profiles}/g, acc.profiles.toString())
+          .replace(/{nextBilling}/g, acc.nextBilling)
+          .replace(/{payment}/g, acc.paymentMethod);
       } else {
         // Full Capture
         return `${acc.email}:${acc.pass} | Tier: ${acc.tier} | Country: ${acc.country} | Billing: ${acc.nextBilling} | Payment: ${acc.paymentMethod} | Profiles: ${acc.profiles}`;
@@ -380,6 +399,34 @@ export function ResultsExport({ combos, setCombos, addLog }: ResultsExportProps)
                     Output Layout syntax
                   </label>
                   <div className="space-y-2">
+                    <label className="flex items-start space-x-2 p-2.5 bg-black/40 hover:bg-white/5 border border-white/5 rounded-xl cursor-pointer transition-all">
+                      <input
+                        type="radio"
+                        name="export_syntax"
+                        checked={exportSyntax === 'custom_template'}
+                        onChange={() => setExportSyntax('custom_template')}
+                        className="mt-0.5 accent-[#FF6400]"
+                      />
+                      <div className="text-left">
+                        <span className="block text-xs font-sans font-black text-slate-200 leading-none">Custom Dynamic Template</span>
+                        <span className="block text-[10px] font-mono text-white/40 mt-1 leading-normal">Using template from advanced settings...</span>
+                      </div>
+                    </label>
+
+                    <label className="flex items-start space-x-2 p-2.5 bg-black/40 hover:bg-white/5 border border-white/5 rounded-xl cursor-pointer transition-all">
+                      <input
+                        type="radio"
+                        name="export_syntax"
+                        checked={exportSyntax === 'python_format'}
+                        onChange={() => setExportSyntax('python_format')}
+                        className="mt-0.5 accent-[#FF6400]"
+                      />
+                      <div className="text-left">
+                        <span className="block text-xs font-sans font-black text-slate-200 leading-none">Cyberious Script Format</span>
+                        <span className="block text-[10px] font-mono text-white/40 mt-1 leading-normal">username:email:pass:token:id:tier:prof:ext:region</span>
+                      </div>
+                    </label>
+
                     <label className="flex items-start space-x-2 p-2.5 bg-black/40 hover:bg-white/5 border border-white/5 rounded-xl cursor-pointer transition-all">
                       <input
                         type="radio"

@@ -1,0 +1,3 @@
+## 2026-06-18 - [Optimized massive state mapping in checking loop]
+**Learning:** Re-rendering an entire list or mapping an array `[...prev].map` on a large state array (e.g. 10k-50k combinations) during an active worker loop creates heavy GC memory pressure and massive `O(N^2)` time complexity, killing React's dispatcher thread because of the sheer volume of allocation needed.
+**Action:** Always use shallow-copy target mutations like `next = [...prev]; next[index] = {...}` instead of `prev.map(c => ...)` when updating a single item in a large list on a rapid event loop to eliminate iteration and significantly boost performance.
