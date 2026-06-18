@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  /* Vibrant Palette theme overrides */
+  --color-slate-950: #0A0A0A;
+  --color-slate-900: #1A1A1A;
+  --color-slate-850: rgba(255, 255, 255, 0.05);
+  --color-slate-800: rgba(255, 255, 255, 0.05);
+  --color-slate-705: rgba(255, 255, 255, 0.2);
+  --color-slate-700: rgba(255, 255, 255, 0.08);
+  --color-slate-650: rgba(255, 255, 255, 0.4);
+  --color-slate-600: rgba(255, 255, 255, 0.3);
+  --color-slate-550: rgba(255, 255, 255, 0.4);
+  --color-slate-500: rgba(255, 255, 255, 0.5);
+  
+  --color-indigo-405: #FF6400;
+  --color-indigo-400: #FF6400;
+  --color-indigo-500: #FF6400;
+  --color-indigo-600: #FF6400;
+  --color-indigo-650: #FF6400;
+  --color-indigo-700: #D85400;
+  --color-indigo-850: rgba(255, 100, 0, 0.15);
+  --color-indigo-900: rgba(255, 100, 0, 0.2);
+  --color-indigo-950: #120904;
+
+  --color-violet-400: #FF6400;
+  --color-violet-500: #FF6400;
+  --color-violet-600: #FF6400;
+  --color-violet-700: #D85400;
+}
+
+body {
+  background-color: #0A0A0A;
+  color: #FFFFFF;
+}

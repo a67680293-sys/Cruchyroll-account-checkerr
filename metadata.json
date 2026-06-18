@@ -1,0 +1,6 @@
+{
+  "name": "Crunchyroll Account Checker",
+  "description": "An advanced account checker for Crunchyroll, featuring both proxy and proxyless testing, thread simulation, detailed subscriber tier extraction, proxy testing, and export features.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
